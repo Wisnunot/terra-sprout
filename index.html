@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TerraSprout — Tunas Bahasa Mesin</title>
+<style>
+  :root{
+    --latar:#F4F1DE; --kartu:#FFFEF7; --hutan:#1B4332; --daun:#2D6A4F;
+    --lumut:#74C69D; --pucuk:#D8F3DC; --tanah:#BC6C25; --teks:#283618; --merah:#C0392B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--latar);color:var(--teks);
+       font:15px/1.55 "Segoe UI",system-ui,sans-serif}
+  .bungkus{max-width:860px;margin:0 auto;padding:0 16px 28px}
+  header{background:linear-gradient(135deg,var(--hutan),var(--daun));
+         color:#fff;border-radius:0 0 28px 28px;padding:30px 28px 24px;
+         box-shadow:0 8px 24px rgba(27,67,50,.25)}
+  header h1{margin:0;font-size:clamp(30px,6vw,46px);letter-spacing:-.02em}
+  header p{margin:6px 0 0;max-width:58ch;color:var(--pucuk)}
+  header .identitas{margin-top:10px;font-size:13px;font-style:italic;color:var(--lumut)}
+  section{background:var(--kartu);border:2px solid var(--lumut);border-radius:22px;
+          padding:18px 20px 20px;margin-top:20px;box-shadow:0 4px 14px rgba(27,67,50,.08)}
+  h2{margin:0 0 12px;font-size:18px;color:var(--hutan)}
+  textarea{width:100%;min-height:110px;resize:vertical;border:2px solid var(--lumut);
+           border-radius:14px;padding:12px;font:14px/1.5 Consolas,monospace;
+           background:#fff;color:var(--teks)}
+  textarea:focus{outline:3px solid var(--pucuk);border-color:var(--daun)}
+  #keluaran{background:var(--pucuk)}
+  .tombol{border:none;border-radius:999px;padding:8px 16px;cursor:pointer;
+          font:inherit;font-weight:700;background:#fff;color:var(--hutan);
+          border:2px solid var(--lumut);transition:.15s}
+  .tombol:hover{background:var(--pucuk)}
+  .tombol.utama{background:var(--daun);color:#fff;border-color:var(--daun)}
+  .tombol.utama:hover{background:var(--hutan)}
+  .palet{display:flex;flex-wrap:wrap;gap:8px}
+  .palet .tombol{background:var(--pucuk)}
+  .baris{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+  .stat{font-size:13px;color:var(--daun);font-weight:600}
+  /* Batang pertumbuhan: garis vertikal seperti batang tanaman */
+  #tahapan{position:relative;margin-top:16px;padding-left:26px}
+  #tahapan::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:4px;
+                   border-radius:4px;background:linear-gradient(var(--lumut),var(--daun))}
+  .tahap{position:relative;background:#fff;border:2px solid var(--lumut);
+         border-radius:16px;margin-bottom:12px;overflow:hidden}
+  .tahap::before{content:"🌿";position:absolute;left:-27px;top:10px;font-size:15px;
+                 background:var(--latar);padding:1px}
+  .tahap.gagal{border-color:var(--merah)}
+  .tahap .kepala{background:var(--daun);color:#fff;display:flex;align-items:center;
+                 gap:8px;padding:7px 12px;font-weight:700}
+  .tahap.gagal .kepala{background:var(--merah)}
+  .tahap .kepala .spasi{flex:1}
+  .tahap .kepala button{border:none;border-radius:8px;background:#fff;color:var(--hutan);
+                        font-weight:900;cursor:pointer;padding:2px 9px}
+  .tahap .opsi{padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px 18px}
+  .tahap .opsi label{display:flex;gap:8px;align-items:center;font-size:14px}
+  select{border:2px solid var(--lumut);border-radius:9px;padding:3px 8px;font:inherit;background:#fff}
+  .kosong{border:2px dashed var(--lumut);border-radius:14px;padding:14px;text-align:center;
+          color:var(--hutan);font-style:italic;background:var(--pucuk)}
+  #pesan{margin-top:10px;font-weight:700;color:var(--merah)}
+  #pesan:empty{display:none}
+  table{width:100%;border-collapse:collapse;font:13px Consolas,monospace}
+  th,td{border:1px solid var(--lumut);padding:6px 8px;text-align:center}
+  th{background:var(--pucuk);color:var(--hutan);font-family:"Segoe UI",sans-serif}
+  .tabel-bungkus{overflow-x:auto;border-radius:12px}
+  footer{text-align:center;margin-top:22px;font-size:13px;font-style:italic;color:var(--daun)}
+</style>
+</head>
+<body>
+<header>
+  <div class="bungkus" style="padding-bottom:0">
+    <h1>🌍 TerraSprout</h1>
+    <p><strong>Tunas Bahasa Mesin</strong> — tanam teks manusia, panen bahasa mesin.
+       Setiap huruf diubah menjadi kode ASCII, biner, dan Base64 tahap demi tahap, seperti tunas yang tumbuh.</p>
+    <p class="identitas">Teknik Kompilasi • Wisnu Septa Harianto Putra • NIM 242502040041 • Kelas 3TI01</p>
+  </div>
+</header>
+
+<div class="bungkus">
+
+  <section>
+    <h2>🌰 Langkah 1 — Benih Teks (bahasa manusia)</h2>
+    <textarea id="masukan" spellcheck="false" placeholder="Ketik teks yang mau ditanam di sini...">Halo, Bumi!</textarea>
+    <div class="baris">
+      <span class="stat" id="stat-masuk"></span><span style="flex:1"></span>
+      <button class="tombol" id="btn-contoh" type="button">🌱 Tanam Contoh</button>
+      <button class="tombol" id="btn-bersih" type="button">Bersihkan Benih</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>🌿 Langkah 2 — Siram Tahap Pertumbuhan</h2>
+    <div class="palet" id="palet"></div>
+    <div id="tahapan"></div>
+    <div class="baris">
+      <button class="tombol" id="btn-cabut" type="button">Cabut Semua Tahap</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>🌻 Langkah 3 — Hasil Panen (bahasa mesin)</h2>
+    <textarea id="keluaran" readonly spellcheck="false"></textarea>
+    <div id="pesan" role="status"></div>
+    <div class="baris">
+      <span class="stat" id="stat-keluar"></span><span style="flex:1"></span>
+      <button class="tombol utama" id="btn-salin" type="button">📋 Salin Hasil Panen</button>
+      <button class="tombol" id="btn-tukar" type="button">🔁 Jadikan Benih Baru</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>🪴 Bedeng Karakter — rincian setiap huruf pada benih teks</h2>
+    <div class="tabel-bungkus">
+      <table>
+        <thead><tr><th>Karakter</th><th>Kode ASCII (Desimal)</th><th>Biner — Bahasa Mesin (8 bit)</th><th>Heksadesimal</th></tr></thead>
+        <tbody id="bedeng"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Dibuat dengan HTML + JavaScript — semua proses berjalan lokal di browser ini, tidak ada data yang diunggah.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var enc = new TextEncoder(), dec = new TextDecoder("utf-8");
+  var PEMISAH = {spasi:" ", koma:", ", baris_baru:"\n", tanpa:""};
+  var PILIH_PEMISAH = [["spasi","Spasi"],["koma","Koma"],["baris_baru","Baris baru"],["tanpa","Tanpa pemisah"]];
+  var PILIH_BASIS = [["10","Desimal (10)"],["16","Heksadesimal (16)"],["8","Oktal (8)"]];
+
+  function keTeks(b){var s="",i;for(i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return s;}
+  function keByte(s){var a=new Uint8Array(s.length),i;for(i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&255;return a;}
+  function potong(s,n){var o=[],i;for(i=0;i<s.length;i+=n)o.push(s.slice(i,i+n));return o;}
+
+  var TAHAP = {
+    ke_biner:{label:"🌱 Ke Biner (Bahasa Mesin)",opsi:[{k:"pemisah",l:"Pemisah",c:PILIH_PEMISAH,def:"spasi"}],
+      run:function(b,o){var h=[],i;for(i=0;i<b.length;i++)h.push(b[i].toString(2).padStart(8,"0"));
+        return enc.encode(h.join(PEMISAH[o.pemisah]));}},
+    dari_biner:{label:"🌿 Dari Biner → Teks",opsi:[],
+      run:function(b){var s=keTeks(b);
+        if(/[^01\s,;:|_\-]/.test(s))throw new Error("Ada karakter selain 0, 1, dan pemisah.");
+        var g=s.match(/[01]+/g)||[];
+        if(g.length===1&&g[0].length>8){if(g[0].length%8)throw new Error("Jumlah bit ("+g[0].length+") bukan kelipatan 8.");g=potong(g[0],8);}
+        return Uint8Array.from(g.map(function(x){if(x.length>8)throw new Error("Grup \""+x+"\" lebih panjang dari 8 bit.");return parseInt(x,2);}));}},
+    ke_ascii:{label:"🍃 Ke Kode ASCII",opsi:[{k:"basis",l:"Basis",c:PILIH_BASIS,def:"10"},{k:"pemisah",l:"Pemisah",c:PILIH_PEMISAH,def:"spasi"}],
+      run:function(b,o){var r=+o.basis,h=[],i,x;for(i=0;i<b.length;i++){x=b[i].toString(r);if(r===16)x=x.padStart(2,"0");h.push(x);}
+        return enc.encode(h.join(PEMISAH[o.pemisah]));}},
+    dari_ascii:{label:"🌾 Dari Kode ASCII → Teks",opsi:[{k:"basis",l:"Basis",c:PILIH_BASIS,def:"10"}],
+      run:function(b,o){var r=+o.basis,s=keTeks(b).replace(/0x/gi," ");
+        var salah={10:/[^0-9\s,;:|_\-]/,16:/[^0-9a-fA-F\s,;:|_\-]/,8:/[^0-7\s,;:|_\-]/}[r];
+        if(salah.test(s))throw new Error("Ada karakter yang tidak sah untuk basis "+r+".");
+        var pola={10:/\d+/g,16:/[0-9a-fA-F]+/g,8:/[0-7]+/g}[r],t=s.match(pola)||[];
+        if(r===16&&t.length===1&&t[0].length>2)t=potong(t[0],2);
+        return Uint8Array.from(t.map(function(x){var n=parseInt(x,r);if(n>255)throw new Error("Kode \""+x+"\" lebih dari 255, bukan satu byte.");return n;}));}},
+    ke_base64:{label:"🌼 Ke Base64",opsi:[{k:"aman_url",l:"Aman untuk URL",c:[["tidak","Tidak"],["ya","Ya"]],def:"tidak"}],
+      run:function(b,o){var s=btoa(keTeks(b));if(o.aman_url==="ya")s=s.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");return keByte(s);}},
+    dari_base64:{label:"🪴 Dari Base64 → Teks",opsi:[],
+      run:function(b){var s=keTeks(b).replace(/\s+/g,"").replace(/-/g,"+").replace(/_/g,"/").replace(/=+$/,"");
+        if(/[^A-Za-z0-9+\/]/.test(s))throw new Error("Ada karakter yang bukan Base64 yang sah.");
+        if(s.length%4===1)throw new Error("Panjang Base64 tidak sah (ada karakter yang kurang).");
+        while(s.length%4)s+="=";return keByte(atob(s));}}
+  };
+
+  var $=function(id){return document.getElementById(id);};
+  var tahapan=[], masukan=$("masukan"), keluaran=$("keluaran"), pesan=$("pesan");
+
+  function tahapBaru(id){var o={};TAHAP[id].opsi.forEach(function(x){o[x.k]=x.def;});return{id:id,opsi:o};}
+
+  function gambarTahap(){
+    $("tahapan").innerHTML = tahapan.length ? tahapan.map(function(t,i){
+      var opsi = TAHAP[t.id].opsi.map(function(x){
+        return '<label>'+x.l+' <select data-k="'+x.k+'">'+x.c.map(function(c){
+          return '<option value="'+c[0]+'"'+(t.opsi[x.k]===c[0]?" selected":"")+'>'+c[1]+'</option>';}).join("")+'</select></label>';
+      }).join("");
+      return '<div class="tahap" data-i="'+i+'"><div class="kepala"><span>'+(i+1)+'. '+TAHAP[t.id].label+'</span><span class="spasi"></span>'+
+        '<button data-a="naik" type="button" aria-label="Naik">↑</button>'+
+        '<button data-a="turun" type="button" aria-label="Turun">↓</button>'+
+        '<button data-a="hapus" type="button" aria-label="Hapus">✕</button></div>'+
+        (opsi?'<div class="opsi">'+opsi+'</div>':"")+'</div>';
+    }).join("") : '<div class="kosong">Belum ada tahap. Klik tombol tahap di atas untuk mulai menumbuhkan.</div>';
+    panen();
+  }
+
+  function panen(){
+    var b=enc.encode(masukan.value), gagal=-1, info="";
+    document.querySelectorAll(".tahap").forEach(function(e){e.classList.remove("gagal");});
+    $("stat-masuk").textContent = b.length+" byte benih";
+    for(var i=0;i<tahapan.length;i++){
+      try{b=TAHAP[tahapan[i].id].run(b,tahapan[i].opsi);}
+      catch(e){gagal=i;info=e.message;break;}
+    }
+    if(gagal>=0){
+      keluaran.value=""; $("stat-keluar").textContent="";
+      var el=document.querySelectorAll(".tahap")[gagal]; if(el)el.classList.add("gagal");
+      pesan.textContent="⚠ Tahap "+(gagal+1)+" ("+TAHAP[tahapan[gagal].id].label+") layu: "+info;
+    }else{
+      var teks=dec.decode(b);
+      keluaran.value = tahapan.length?teks:masukan.value;
+      $("stat-keluar").textContent = tahapan.length?b.length+" byte panen":"";
+      pesan.textContent = (tahapan.length&&teks.indexOf("�")>-1)
+        ? "Hasil bukan teks UTF-8 yang sah — tambahkan tahap 'Ke Kode ASCII (Basis Heksadesimal)' untuk melihat byte mentahnya." : "";
+    }
+    $("bedeng").innerHTML = Array.from(masukan.value).slice(0,60).map(function(h){
+      var k=h.codePointAt(0), tampil={ " ":"␣ (spasi)","\n":"↵ (enter)","\t":"⇥ (tab)"}[h]||h;
+      return "<tr><td>"+tampil+"</td><td>"+k+"</td><td>"+k.toString(2).padStart(8,"0")+"</td><td>"+k.toString(16).toUpperCase().padStart(2,"0")+"</td></tr>";
+    }).join("");
+  }
+
+  $("palet").innerHTML = Object.keys(TAHAP).map(function(k){
+    return '<button class="tombol" data-t="'+k+'" type="button">+ '+TAHAP[k].label+'</button>';}).join("");
+  $("palet").addEventListener("click",function(e){
+    var b=e.target.closest("[data-t]"); if(!b)return;
+    tahapan.push(tahapBaru(b.dataset.t)); gambarTahap();});
+  $("tahapan").addEventListener("click",function(e){
+    var b=e.target.closest("[data-a]"); if(!b)return;
+    var i=+b.closest(".tahap").dataset.i, a=b.dataset.a, tmp;
+    if(a==="hapus")tahapan.splice(i,1);
+    else if(a==="naik"&&i>0){tmp=tahapan[i-1];tahapan[i-1]=tahapan[i];tahapan[i]=tmp;}
+    else if(a==="turun"&&i<tahapan.length-1){tmp=tahapan[i+1];tahapan[i+1]=tahapan[i];tahapan[i]=tmp;}
+    gambarTahap();});
+  $("tahapan").addEventListener("change",function(e){
+    var k=e.target.dataset.k; if(!k)return;
+    tahapan[+e.target.closest(".tahap").dataset.i].opsi[k]=e.target.value; panen();});
+  $("btn-cabut").addEventListener("click",function(){tahapan=[];gambarTahap();});
+  $("btn-bersih").addEventListener("click",function(){masukan.value="";panen();masukan.focus();});
+  $("btn-contoh").addEventListener("click",function(){masukan.value="Halo, Bumi!";panen();});
+  $("btn-tukar").addEventListener("click",function(){if(keluaran.value){masukan.value=keluaran.value;panen();}});
+  $("btn-salin").addEventListener("click",function(){
+    var btn=this; if(!keluaran.value)return;
+    function kilat(t){btn.textContent=t;setTimeout(function(){btn.textContent="📋 Salin Hasil Panen";},1500);}
+    if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(keluaran.value).then(function(){kilat("Tersalin 🌻");});
+    else{keluaran.select();document.execCommand("copy");kilat("Tersalin 🌻");}});
+  masukan.addEventListener("input",panen);
+
+  tahapan=[tahapBaru("ke_biner")];
+  gambarTahap();
+})();
+</script>
+</body>
+</html>
